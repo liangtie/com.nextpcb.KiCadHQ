@@ -127,6 +127,8 @@ modules:
     config-opts:
       - --with-opengl
       - --disable-glcanvasegl
+      - PKG_CONFIG_PATH=/app/lib/pkgconfig
+      - LDFLAGS=-Wl,-rpath=/app/lib64:/app/lib -L/app/lib -L/app/lib64 -lGL -lGLU  # 添加 -lGL
     sources:
       - type: git
         commit: 5ff25322553c1870cf20a2e1ba6f20ed50d9fe9a
@@ -304,8 +306,8 @@ modules:
     sources:
       - type: git
         dest: kicad-git
-        url: https://gitlab.com/kicad/code/kicad.git
-        commit: 286b0611feca00727bf70bfa184ec2c28a745dc3
+        url: https://gitlab.com/kicad-hq/kicad.git
+        commit: 2ba3e940f88ad5a083d8e9ac8b27200437398f56
         tag: 9.0.0
         x-checker-data:
           is-main-source: true
