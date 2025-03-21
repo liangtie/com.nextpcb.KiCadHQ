@@ -32,7 +32,6 @@ cleanup:
   - /lib/cmake
   - /lib/pkgconfig
   - /lib/wx
-  - /lib64
   - /share/aclocal
   - /share/bakefile
   - '*.la'
@@ -128,7 +127,7 @@ modules:
       - --with-opengl
       - --disable-glcanvasegl
       - PKG_CONFIG_PATH=/app/lib/pkgconfig
-      - LDFLAGS=-Wl,-rpath=/app/lib64:/app/lib -L/app/lib -L/app/lib64 -lGL -lGLU  # 添加 -lGL
+      - LDFLAGS=-Wl,-rpath=/app/lib64:/app/lib -L/app/lib -L/app/lib64 -lGL # 添加 -lGL
     sources:
       - type: git
         commit: 5ff25322553c1870cf20a2e1ba6f20ed50d9fe9a
@@ -211,6 +210,8 @@ modules:
       - /lib/pkgconfig
     config-opts:
       - -DCMAKE_BUILD_TYPE=RelWithDebInfo
+      - -DCMAKE_INSTALL_PREFIX=/app
+      - -DCMAKE_INSTALL_LIBDIR=/app/lib
     sources:
       - type: git
         commit: 338e6fb681369ff0537719095e22ce9dc602dbf0
@@ -224,6 +225,11 @@ modules:
     buildsystem: cmake-ninja
     config-opts:
       - -Dprotobuf_BUILD_SHARED_LIBS=ON
+      - -Dprotobuf_BUILD_TESTS=OFF
+      - -Dprotobuf_ALLOW_CCACHE=ON
+      - -Dprotobuf_LOCAL_DEPENDENCIES_ONLY=ON
+      - -DCMAKE_INSTALL_PREFIX=/app
+      - -DCMAKE_INSTALL_LIBDIR=/app/lib
     cleanup:
       - /bin
       - /include
@@ -232,15 +238,21 @@ modules:
         url: https://github.com/protocolbuffers/protobuf.git
         tag: v29.3
         commit: b407e8416e3893036aee5af9a12bd9b6a0e2b2e6
+        # Fix protobuf < v30 due to kicad 9.0.0 not building against protobuf
+        # v30.1. kicad 9.0.1 will support protobuf v30.1.
         x-checker-data:
           type: git
           tag-pattern: ^v([\d.]+)$
+          versions:
+            <: '30'
 
   - name: nng
     buildsystem: cmake-ninja
     config-opts:
       - -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - -DBUILD_SHARED_LIBS=ON
+      - -DCMAKE_INSTALL_PREFIX=/app
+      - -DCMAKE_INSTALL_LIBDIR=/app/lib
     cleanup:
       - /bin
       - /include
@@ -255,11 +267,30 @@ modules:
 
   - python3-pytest.yml
 
+
+  - name: libsecret
+    buildsystem: meson
+    config-opts:
+      - -Dmanpage=false
+      - -Dvapi=false
+      - -Dgtk_doc=false
+      - -Dintrospection=false
+      - -Dlibdir=/app/lib
+    cleanup:
+      - /bin
+      - /share/man
+    sources:
+      - type: archive
+        url: https://download.gnome.org/sources/libsecret/0.21/libsecret-0.21.4.tar.xz
+        sha256: 163d08d783be6d4ab9a979ceb5a4fecbc1d9660d3c34168c581301cd53912b20
+
+
   - name: kicad
     builddir: true
     buildsystem: cmake-ninja
     config-opts:
-      - -DCMAKE_BUILD_TYPE=RelWithDebInfo
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DCMAKE_CXX_FLAGS="-O1"
       - -DCMAKE_CTEST_ARGUMENTS="--output-on-failure"
       - -DGLEW_INCLUDE_DIR=/app/include/GL
       - -DOCC_INCLUDE_DIR=/app/include/opencascade
@@ -268,6 +299,10 @@ modules:
       - -DKICAD_BUILD_I18N=ON
       - -DKICAD_USE_EGL=OFF
       - -DKICAD_LIBRARY_DATA=/app/extensions/Library
+      - -DCMAKE_INSTALL_PREFIX=/app
+      - -DCMAKE_INSTALL_LIBDIR=/app/lib
+      # - -DCMAKE_LIBRARY_PATH=/app/lib
+
     post-install:
       - install ../../flatpak-extra/kicad-startup /app/bin/kicad-startup
       - install ../../flatpak-extra/eeschema-startup /app/bin/eeschema-startup
@@ -277,6 +312,8 @@ modules:
       - ln -s /app/bin/pip3.10 /app/bin/pip3
       - ln -s /app/bin/pip3 /app/bin/pip
       - install -d /app/extensions/ODBCDriver
+      # - ln -s /app/lib64/libkigal.so.9.0.0 /app/lib/
+      # - ls -l /app/lib64/libkigal*
       # Alter the desktop files for kicad, eeschema, and pcbnew to use the
       # wrapper scripts installing/uninstalling the ODBC drivers before
       # launching the apps.
