@@ -1,6 +1,6 @@
 app-id: org.kicad.KiCad
 runtime: org.freedesktop.Sdk
-runtime-version: '24.08'
+runtime-version: "24.08"
 sdk: org.freedesktop.Sdk
 command: kicad-startup
 finish-args:
@@ -35,8 +35,8 @@ cleanup:
   - /lib64
   - /share/aclocal
   - /share/bakefile
-  - '*.la'
-  - '*.a'
+  - "*.la"
+  - "*.a"
 
 modules:
   - shared-modules/glu/glu-9.json
@@ -140,6 +140,7 @@ modules:
         paths:
           - patches/wxWidgets_0001_Allow-wxDataViewCustomRenderer-GetSize()-return-0-in-wxGTK.patch
           - patches/wxWidgets_0002_Fix-border-size-for-wxStaticBox-with-GTK3.patch
+          - patches/wxWidgets-0003-refactor-gtk-use-RunScriptAsync-instead-of-RunScript.patch
 
   - python3-wxPython.yml
   - python3-requests.yml

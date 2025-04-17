@@ -1,0 +1,28 @@
+From c7e421a26ae9f0bf03fc9a199cdbdfbd2a987242 Mon Sep 17 00:00:00 2001
+From: Ethan Chien <liangtie.qian@gmail.com>
+Date: Thu, 17 Apr 2025 14:42:47 +0800
+Subject: [PATCH] refactor(gtk): use RunScriptAsync instead of RunScript in
+ AddScriptMessageHandler
+
+- Replace RunScript with RunScriptAsync in the wxWebViewWebKit::AddScriptMessageHandler method
+- This change improves performance by executing the script asynchronously
+---
+ src/gtk/webview_webkit2.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/gtk/webview_webkit2.cpp b/src/gtk/webview_webkit2.cpp
+index f072bc4c16..eba3c6c70a 100644
+--- a/src/gtk/webview_webkit2.cpp
++++ b/src/gtk/webview_webkit2.cpp
+@@ -1330,7 +1330,7 @@ bool wxWebViewWebKit::AddScriptMessageHandler(const wxString& name)
+         wxString js = wxString::Format("window.%s = window.webkit.messageHandlers.%s;",
+                 name, name);
+         AddUserScript(js);
+-        RunScript(js);
++        RunScriptAsync(js);
+     }
+ 
+     return res;
+-- 
+2.47.1.windows.2
+
